@@ -1,8 +1,11 @@
+package controller;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
 
+import integration.DatabaseHandler;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
@@ -18,6 +21,14 @@ import javax.servlet.http.HttpSession;
  * @author Karoline Malko
  */
 public class Controller extends HttpServlet {
+
+    private DatabaseHandler databaseHandler;
+    
+    public Controller() {
+        this.databaseHandler = new DatabaseHandler();
+        this.databaseHandler.establishConnection();
+    }
+    
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
