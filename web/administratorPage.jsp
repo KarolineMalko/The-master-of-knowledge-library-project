@@ -5,6 +5,13 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<%
+    if(session.getAttribute("adminID") == null) {
+        return;
+    }
+%>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,6 +20,9 @@
     </head>
     <body>
        <h1>Welcome!</h1>
+       <%
+            out.print("<h2>Book: " + session.getAttribute("adminID") + "</h2>\n");
+        %>
         <h2>choose what to do:</h2>
         <form method="post">
             <button type=\"submit\" name="listLectures">Se listed lectures</button>

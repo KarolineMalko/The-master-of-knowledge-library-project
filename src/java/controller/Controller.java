@@ -70,23 +70,27 @@ public class Controller extends HttpServlet {
     
     
     public void welcomePageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException{
-         if(parametersMap.containsKey("visitSub")){
+         if(parametersMap.containsKey("visitSub")) {
             forwardingDispatcher(request, response, "/visitorLoginPage.jsp");
-           // return 0;
-        }else if(parametersMap.containsKey("adminSub"))
+            
+        }else if(parametersMap.containsKey("adminSub")) {
             forwardingDispatcher(request, response, "/adminLoginPage.jsp");
-            //return 1;
-        
+        }
     }
     
     public void visitorLoginPageHandler(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         String email = request.getParameter("visitEmail");
         String pass = request.getParameter("visitPassword");
-        System.out.println("here");
+        String userIDTxt = this.databaseHandler.importUserID(email, pass);
+        addAttributeToSession(request, "userID", userIDTxt);
         forwardingDispatcher(request, response, "/visitorPage.jsp");
     }
     
     public void adminLoginPageHandler(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+        String email = request.getParameter("adminEmail");
+        String pass = request.getParameter("adminPassword");
+        String adminIDTxt = this.databaseHandler.importAdminID(email, pass);
+        addAttributeToSession(request, "adminID", adminIDTxt);
         forwardingDispatcher(request, response, "/administratorPage.jsp");
     }
     
@@ -141,19 +145,23 @@ public class Controller extends HttpServlet {
         processRequest(request, response);
         try{
             
-            
             processRequest(request, response);
-            Map<String, String[]> parametersMap =  request.getParameterMap();                         
-            welcomePageHandler(request, response, parametersMap);
-            if(parametersMap.containsKey("visitPassword")) {
+            Map<String, String[]> parametersMap =  request.getParameterMap(); 
+            if (parametersMap.containsKey("visitSub") || parametersMap.containsKey("adminSub")) {
+                welcomePageHandler(request, response, parametersMap);
+            }
+            else if(parametersMap.containsKey("visitPassword")) {
                 visitorLoginPageHandler(request, response);
             }else if(parametersMap.containsKey("adminEmail")) {
                 adminLoginPageHandler(request, response);
             }
-            
-            visitorPageHandler(request, response, parametersMap);
-            administratorPageHandler(request, response, parametersMap);
-            
+            else if(parametersMap.containsKey("rentBook") || parametersMap.containsKey("returnBook") || parametersMap.containsKey("bookLecture")) {
+                 visitorPageHandler(request, response, parametersMap);
+            }
+            else if(parametersMap.containsKey("listLectures") || parametersMap.containsKey("newSlot")) {
+                
+                administratorPageHandler(request, response, parametersMap);
+            }
         
     }catch(Exception e) {
             e.printStackTrace();

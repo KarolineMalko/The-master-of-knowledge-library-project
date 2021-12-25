@@ -43,5 +43,121 @@ public class DatabaseHandler {
         }
     }
     
+    /**
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    public String importUserID(String username, String password) {
+
+        String query =  "SELECT 	visitor_id\n" +
+                        "FROM 	public.visitor_loginInfo\n" +
+                        "WHERE	visitor_email=\'" + username + "\' and " +
+                        "       visitor_password = md5(\'" + password + "\')";
+        
+        try {
+ 
+           ArrayList<String> resultList = getResultsFromQuery(query, 1);
+
+           return arrayListToString(resultList);
+           
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
     
+    
+    public String importAdminID(String username, String password) {
+
+        String query =  "SELECT adminstrator_id\n" +
+                        "FROM 	public.admin_logininfo\n" +
+                        "WHERE	admin_email =\'" + username + "\' and " +
+                        "       admin_password = md5(\'" + password + "\')";
+        
+        try {
+ 
+           ArrayList<String> resultList = getResultsFromQuery(query, 1);
+
+           return arrayListToString(resultList);
+           
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+    
+    
+    
+    
+    /**
+     *
+     * @param result
+     * @return
+     */
+    public String arrayListToString(ArrayList<String> result) {
+        StringBuilder sb = new StringBuilder();
+        for(String s : result){
+            sb.append(s);
+
+        }
+        String str = sb.toString();
+        return str;
+    }
+    
+    /**
+     *
+     * @param query
+     * @return
+     */
+    public ArrayList<String> getResultRowFromQuery(String query) {
+        try {
+            ResultSet executionResult = this.statment.executeQuery(query);
+            
+                ArrayList<String> resultsArray = new ArrayList<>();
+                
+                while(executionResult.next() == true) {
+                    
+                }
+
+                return resultsArray;
+            
+           
+        }catch(PSQLException pslExc) {
+
+        } 
+        catch (SQLException e) {
+        }
+        return new ArrayList<>();
+    
+    }
+    
+    /**
+     *
+     * @param query
+     * @param columNum
+     * @return
+     */
+    public ArrayList<String> getResultsFromQuery(String query, int columNum){
+        try {
+            ResultSet executionResult = this.statment.executeQuery(query);
+            
+                ArrayList<String> resultsArray = new ArrayList<>();
+
+                while(executionResult.next() == true) {
+                    resultsArray.add( executionResult.getString(columNum));
+                }
+
+                return resultsArray;
+            
+           
+        }catch(PSQLException pslExc) {
+
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<String>();
+    }
 }
