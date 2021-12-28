@@ -5,9 +5,12 @@ package controller;
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
 
+import beans.StockBook;
+import beans.VisitorCurrentRental;
 import integration.DatabaseHandler;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Map;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -82,7 +85,7 @@ public class Controller extends HttpServlet {
         String email = request.getParameter("visitEmail");
         String pass = request.getParameter("visitPassword");
         String userIDTxt = this.databaseHandler.importUserID(email, pass);
-        addAttributeToSession(request, "userID", userIDTxt);
+        addAttributeToSession(request, "visitorID", userIDTxt);
         forwardingDispatcher(request, response, "/visitorPage.jsp");
     }
     
@@ -94,16 +97,61 @@ public class Controller extends HttpServlet {
         forwardingDispatcher(request, response, "/administratorPage.jsp");
     }
     
+    public void rentBookPageHandler(HttpServletRequest request, HttpServletResponse response, String pagePathAndName) throws ServletException, IOException{
+        ArrayList<StockBook> stockBooksInfo = this.databaseHandler.importStockBooksInfo();
+        addAttributeToSession(request, "stockBooks", stockBooksInfo);
+        forwardingDispatcher(request, response, "/availableStockBooksPage.jsp");
+    }
+    
     public void visitorPageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException{
         if(parametersMap.containsKey("rentBook")){
-            forwardingDispatcher(request, response, "/rentalBookPage.jsp");
+            
+            rentBookPageHandler(request, response, "/rentalBookPage.jsp");
             
         }else if(parametersMap.containsKey("returnBook")){
-            forwardingDispatcher(request, response, "/returnBookPage.jsp");
+            returnBookActionPageHanlder(request, response, parametersMap);
             
         }else if(parametersMap.containsKey("bookLecture")){
             forwardingDispatcher(request, response, "/lecturesPage.jsp");
         }
+    }
+    
+    
+    
+    private void rentBookActionPageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException {
+        int bookIsbn = Integer.parseInt(request.getParameter("rentBookAction"));
+        String visitorIDAsText =  (String) getAttributeFromSession(request, "visitorID");
+        int visitorID = Integer.parseInt(visitorIDAsText);
+        int availableCopies = this.databaseHandler.checkAvailableCopies(bookIsbn);
+        int rentedVisitorBooks = this.databaseHandler.checkVisitorRentalBooksLimit(visitorID);
+        if(visitorID == 0 || rentedVisitorBooks == -1 || availableCopies == -1 ) {
+            forwardingDispatcher(request, response, "/failedRental.jsp");
+            return;
+        }
+        boolean decreaseSucess = this.databaseHandler.decreaseBookAvailableCopies(bookIsbn); 
+        if (decreaseSucess != true) {
+            forwardingDispatcher(request, response, "/failedRental.jsp");
+            return;
+        }
+        
+        boolean visitorRentalSucess = this.databaseHandler.increaseVisitorRentedBooks(visitorID); 
+        if(visitorRentalSucess != true) {
+            forwardingDispatcher(request, response, "/failedRental.jsp");
+            return;
+        }
+        
+        boolean newRentalInstance = this.databaseHandler.createNewRentalInstance(visitorID, bookIsbn);
+        if(newRentalInstance != true) {
+            forwardingDispatcher(request, response, "/failedRental.jsp");
+            return;
+        }
+        forwardingDispatcher(request, response, "/successfulRental.jsp");
+    }
+    
+    
+    private void returnBookActionPageHanlder(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) {
+        
+        
     }
     
     public void administratorPageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException{
@@ -114,6 +162,8 @@ public class Controller extends HttpServlet {
             forwardingDispatcher(request, response, "/newSlot.jsp");
         }
     }
+    
+    
     
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -142,7 +192,7 @@ public class Controller extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
-        processRequest(request, response);
+        //processRequest(request, response);
         try{
             
             processRequest(request, response);
@@ -161,6 +211,8 @@ public class Controller extends HttpServlet {
             else if(parametersMap.containsKey("listLectures") || parametersMap.containsKey("newSlot")) {
                 
                 administratorPageHandler(request, response, parametersMap);
+            }else if (parametersMap.containsKey("rentBookAction")) {
+                rentBookActionPageHandler(request, response, parametersMap);
             }
         
     }catch(Exception e) {
@@ -178,5 +230,9 @@ public class Controller extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    
+
+    
 
 }

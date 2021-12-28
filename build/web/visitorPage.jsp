@@ -6,7 +6,7 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    if(session.getAttribute("userID") == null) {
+    if(session.getAttribute("visitorID") == "") {
         return;
     }
 %>
@@ -19,7 +19,7 @@
         <body>
         <h1>Welcome! </h1>
         <%
-            out.print("<h2>Book: " + session.getAttribute("userID") + "</h2>\n");
+            out.print("<h2>Welcome: " + session.getAttribute("visitorID") + "</h2>\n");
         %>
         <h2>Book:</h2>
         <form method="post">
