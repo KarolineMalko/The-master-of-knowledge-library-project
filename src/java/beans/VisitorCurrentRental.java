@@ -4,12 +4,14 @@
  */
 package beans;
 
+import java.math.BigInteger;
+
 /**
  *
  * @author garom
  */
 public class VisitorCurrentRental {
-    private int isbn;
+    private BigInteger isbn;
     private String title;
     private String author;
     private String language;
@@ -19,7 +21,7 @@ public class VisitorCurrentRental {
     public VisitorCurrentRental() {
     }
 
-    public int getIsbn() {
+    public BigInteger getIsbn() {
         return isbn;
     }
 
@@ -43,7 +45,7 @@ public class VisitorCurrentRental {
         return return_date;
     }
 
-    public void setIsbn(int isbn) {
+    public void setIsbn(BigInteger isbn) {
         this.isbn = isbn;
     }
 

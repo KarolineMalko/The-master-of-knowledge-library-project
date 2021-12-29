@@ -37,7 +37,11 @@
                 content.append("&emsp;&emsp;");
                 content.append(stockBooks.get(i).getAvailableCopies());
                 content.append("&emsp;&emsp;");
-                content.append("<button type=\"submit\" name =\"rentBookAction\" value =\""+ stockBooks.get(i).getIsbn() + "\">Rent</button>");
+                if(stockBooks.get(i).getAvailableCopies() <= 0) {
+                    content.append("<button type=\"button\" disabled name =\"rentBookAction\" value =\""+ stockBooks.get(i).getIsbn() + "\">Rent</button>");
+                }else {
+                    content.append("<button type=\"submit\" name =\"rentBookAction\" value =\""+ stockBooks.get(i).getIsbn() + "\">Rent</button>");
+                }
                 content.append("</p>");
                 
             }

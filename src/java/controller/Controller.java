@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -109,7 +111,7 @@ public class Controller extends HttpServlet {
             rentBookPageHandler(request, response, "/rentalBookPage.jsp");
             
         }else if(parametersMap.containsKey("returnBook")){
-            returnBookActionPageHanlder(request, response, parametersMap);
+            showCurrentRentedBooks(request, response, parametersMap);
             
         }else if(parametersMap.containsKey("bookLecture")){
             forwardingDispatcher(request, response, "/lecturesPage.jsp");
@@ -149,10 +151,51 @@ public class Controller extends HttpServlet {
     }
     
     
-    private void returnBookActionPageHanlder(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) {
-        
+    private void showCurrentRentedBooks(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException {
+        try {
+            String visitorIDAsText =  (String) getAttributeFromSession(request, "visitorID");
+            int visitorID = Integer.parseInt(visitorIDAsText);
+            ArrayList<VisitorCurrentRental> visitorRentals = this.databaseHandler.importVisitorRentalsInfo(visitorID);
+
+            addAttributeToSession(request, "visitorRentals", visitorRentals);
+            forwardingDispatcher(request, response, "/showVisitorRentals.jsp");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         
     }
+    
+    
+    private void returnBookActionPageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException {
+        
+        int bookIsbn = Integer.parseInt(request.getParameter("returnBookAction"));
+        String visitorIDAsText =  (String) getAttributeFromSession(request, "visitorID");
+        int visitorID = Integer.parseInt(visitorIDAsText);
+        
+        boolean rentalTerminateUpdateSucess = this.databaseHandler.updateRentalTerminationStatus(bookIsbn, visitorID); 
+        if (rentalTerminateUpdateSucess != true) {
+            forwardingDispatcher(request, response, "/failedRentalReturn.jsp");
+            return;
+        }
+        
+        boolean visitorRentedAmountSucess = this.databaseHandler.decreaseVisitorRentedBooks(visitorID); 
+        if(visitorRentedAmountSucess != true) {
+            forwardingDispatcher(request, response, "/failedRentalReturn.jsp");
+            return;
+        }
+        boolean updateBookAvailableCopiesSuccess = this.databaseHandler.updateStockBookAvailableCopies(bookIsbn);
+        //System.out.println(updateBookAvailableCopiesSuccess);
+        if(updateBookAvailableCopiesSuccess != true) {
+            forwardingDispatcher(request, response, "/failedRentalReturn.jsp");
+            return;
+        }
+        forwardingDispatcher(request, response, "/successfulReturn.jsp");
+        
+    }
+
+    
+    
+    
     
     public void administratorPageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException{
         if(parametersMap.containsKey("listLectures")){
@@ -213,6 +256,8 @@ public class Controller extends HttpServlet {
                 administratorPageHandler(request, response, parametersMap);
             }else if (parametersMap.containsKey("rentBookAction")) {
                 rentBookActionPageHandler(request, response, parametersMap);
+            }else if(parametersMap.containsKey("returnBookAction")) {
+                returnBookActionPageHandler(request, response, parametersMap);
             }
         
     }catch(Exception e) {
@@ -231,6 +276,7 @@ public class Controller extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    
     
 
     

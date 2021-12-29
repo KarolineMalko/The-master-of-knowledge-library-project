@@ -97,7 +97,7 @@ public class DatabaseHandler {
         
         String query = "SELECT	isbn, title, author, language, publish_date, available_copies\n" +
                         "FROM	public.stock, public.book\n" +
-                        "WHERE	available_copies > 0 and \n" +
+                        "WHERE	available_copies >= 0 and \n" +
                         "		public.book.ISBN = public.stock.book_isbn\n" +
                         "ORDER BY title, author";
         try{
@@ -227,11 +227,11 @@ public class DatabaseHandler {
         
     }
     
-    public ArrayList<StockBook> importVisitorRentalsInfo(int visitorID) {
+    public ArrayList<VisitorCurrentRental> importVisitorRentalsInfo(int visitorID) {
         
         String query = "SELECT 	isbn, title, author, language, rental_date, return_date\n" +
                         "FROM 	public.rental, public.book\n" +
-                        "WHERE	visitor_id = 1 and \n" +
+                        "WHERE	visitor_id = " +  visitorID+" and \n" +
                         "	rental.book_isbn = book.isbn and\n" +
                         "	terminated = 0 ";
         try{
@@ -240,10 +240,10 @@ public class DatabaseHandler {
             ArrayList<String> titles = getResultsFromQuery(query, 2);
             ArrayList<String> authors = getResultsFromQuery(query, 3);
             ArrayList<String> languages = getResultsFromQuery(query, 4);
-            ArrayList<String> publishDates = getResultsFromQuery(query, 5);
-            ArrayList<String> availableCopies = getResultsFromQuery(query, 6);
+            ArrayList<String> rentalDates = getResultsFromQuery(query, 5);
+            ArrayList<String> returnDates = getResultsFromQuery(query, 6);
             
-            return fillStockBooksInstance(isbns, titles, authors, languages, publishDates, availableCopies);
+            return fillVisitorRentals(isbns, titles, authors, languages, rentalDates, returnDates);
             
             
         }catch(Exception e) {
@@ -252,9 +252,85 @@ public class DatabaseHandler {
         return new ArrayList<>();
     }
 
-
-    public void getVisitorRentals() {
+    
+    public boolean updateRentalTerminationStatus(int bookIsbn, int visitorID) {
+    
+        String selectQuery =    "SELECT terminated\n" +
+                                "FROM 	public.rental\n" +
+                                "WHERE	book_isbn = " + bookIsbn;
         
+        String updateQuery =    "UPDATE public.rental\n" +
+                                "SET 	terminated = 1\n" +
+                                "WHERE 	visitor_id = "+ visitorID+" and\n" +
+                                "	book_isbn = " + bookIsbn;
+        
+        try {
+           // int selectedRentalStatusBeforeReturn = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+            getResultsFromQuery(updateQuery, 1);
+//            int selectedRentalStatusAfterReturn = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+//            if(selectedRentalStatusAfterReturn == 1) {
+//                return true;
+//            }
+            return true;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    
+    public boolean decreaseVisitorRentedBooks(int visitorID) {
+    
+        String selectQuery =    "SELECT rented_books_amount\n" +
+                                "FROM 	public.visitor\n" +
+                                "WHERE	id = " + visitorID ;
+        
+        String updateQuery =    "UPDATE public.visitor\n" +
+                                "SET 	rented_books_amount = rented_books_amount - 1\n" +
+                                "WHERE 	id = "+ visitorID;
+        
+        try {
+            int selectedrentalsAmountBeforeReturn = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+            //Thread.sleep(1000);
+            getResultsFromQuery(updateQuery, 1);
+            //Thread.sleep(1000);
+            int selectedrentalsAmountAfterReturn = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+            //System.out.println("selectedrentalsAmountBeforeReturn:" + selectedrentalsAmountBeforeReturn);
+            //System.out.println("selectedrentalsAmountAfterReturn:" + selectedrentalsAmountAfterReturn);
+            if(selectedrentalsAmountAfterReturn < selectedrentalsAmountBeforeReturn) {
+                 return true;
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public boolean updateStockBookAvailableCopies(int bookIsbn) {
+    
+        String selectQuery =    "SELECT available_copies\n" +
+                                "FROM 	public.stock\n" +
+                                "WHERE	book_isbn = " + bookIsbn ;
+        
+        String updateQuery =    "UPDATE public.stock\n" +
+                                "SET 	available_copies= available_copies + 1\n" +
+                                "WHERE 	book_isbn ="+ bookIsbn;
+        
+        try {
+            int updateStockAvailableCopiesBeforeUpdate = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+            Thread.sleep(200);
+            getResultsFromQuery(updateQuery, 1);
+            Thread.sleep(200);
+            int updateStockAvailableCopiesAfterUpdate = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+            //System.out.println("updateStockAvailableCopiesBeforeUpdate:" + updateStockAvailableCopiesBeforeUpdate);
+            //System.out.println("updateStockAvailableCopiesAfterUpdate:" + updateStockAvailableCopiesAfterUpdate);
+            if(updateStockAvailableCopiesBeforeUpdate < updateStockAvailableCopiesAfterUpdate) {
+                return true;
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     
@@ -293,7 +369,7 @@ public class DatabaseHandler {
                 return resultsArray;
            
         }catch (Exception e) {
-            e.printStackTrace();
+           // System.out.print("No Data has been returned from teh update query");
         }
         return new ArrayList<>();
     }
@@ -315,10 +391,29 @@ public class DatabaseHandler {
         
     }
 
-//    private ArrayList<VisitorCurrentRental> fillVisitorRentlsArrayList()
-//                visitorCurrentRentals = new ArrayList<>();
-//    
-//   
+    private ArrayList<VisitorCurrentRental> fillVisitorRentals(ArrayList<String> isbns, ArrayList<String> titles, ArrayList<String> authors, ArrayList<String> languages, ArrayList<String> rentalDates, ArrayList<String> returnDates) {
+        
+        ArrayList<VisitorCurrentRental> visitorRentals = new ArrayList<>();
+        int numberOfRentedBooks = isbns.size();
+        for(int i = 0; i < numberOfRentedBooks; i++) {
+           VisitorCurrentRental vCR = new VisitorCurrentRental();
+           vCR.setIsbn(new BigInteger(isbns.get(i)));
+           vCR.setTitle(titles.get(i));
+           vCR.setAuthor(authors.get(i));
+           vCR.setLanguage(languages.get(i));
+           vCR.setRental_date(rentalDates.get(i));
+           vCR.setReturn_date(returnDates.get(i));
+           visitorRentals.add(vCR);
+        }
+        return visitorRentals;
+        
+    }
+
+    
+           
+                
+    
+   
 
   
 }
