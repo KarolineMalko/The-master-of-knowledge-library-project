@@ -3,6 +3,9 @@ package integration;
 
 import beans.StockBook;
 import beans.VisitorCurrentRental;
+import beans.IncomingLecture;
+import beans.LectureInfo;
+import beans.OngoingLectureInfo;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
@@ -333,7 +336,229 @@ public class DatabaseHandler {
         return false;
     }
 
+
     
+
+
+
+    public ArrayList<OngoingLectureInfo> importOngoingLectures(){
+        String query =  "SELECT 	*\n" +
+                        "FROM 	public.lecture\n" +
+                        "WHERE	date < now()::timestamp and \n" +
+                        "date + '2 hours' > now()::timestamp";
+        try{ 
+            ArrayList<String> lecturesNames = getResultsFromQuery(query, 2);
+            ArrayList<String> lectursdate = getResultsFromQuery(query, 3);
+            ArrayList<String> roomsId = getResultsFromQuery(query, 4);
+            ArrayList<String> enrolledStudentNums = getResultsFromQuery(query, 6);
+            
+            
+            ArrayList<OngoingLectureInfo> currentLectures = fillCurrentLecList(lecturesNames, lectursdate, roomsId, enrolledStudentNums);
+            
+            return currentLectures;
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<OngoingLectureInfo>();
+    }
+
+
+
+    public ArrayList<OngoingLectureInfo> fillCurrentLecList(ArrayList<String> lecturesNames, ArrayList<String> lectursdate, ArrayList<String> roomsId, ArrayList<String> enrolledStudentNums) {
+        
+            ArrayList<OngoingLectureInfo> lecturesInfo = new  ArrayList<>();
+            int lecturesNamesSize = lecturesNames.size();
+            
+            for(int i = 0; i < lecturesNamesSize; i++) {
+                OngoingLectureInfo ongoinfLecture = new OngoingLectureInfo();
+                ongoinfLecture.setLectureSubject(lecturesNames.get(i));
+                ongoinfLecture.setLectureDate(lectursdate.get(i));
+                ongoinfLecture.setRoomId(Integer.parseInt(roomsId.get(i)));
+                ongoinfLecture.setEnrolledVisitorsNum(Integer.parseInt(enrolledStudentNums.get(i)));
+                
+                lecturesInfo.add(ongoinfLecture);
+            }
+            return lecturesInfo;
+            
+    }
+
+
+
+
+     public boolean newLectureInsert(LectureInfo lectureInfo) {
+        
+        String insertQuery = "INSERT INTO public.lecture(\n" +
+                       "    subject, date, room_id, lecturer_id, enrolled_visitors)\n" +
+                       "   VALUES (\'" + lectureInfo.getLectureSubject() +"\', \n" +
+                       "			\'" + lectureInfo.getLectureDate()+"\', \n" +
+                       "			" + lectureInfo.getRoomId() +",  \n" +
+                       "			(SELECT 	id\n" +
+                       "			FROM 	public.lecturer\n" +
+                       "			WHERE	personal_number = \'" + lectureInfo.getLecturerPersonNum() +"\'), \n" +
+                       "			0)";
+        
+        //System.out.println(query);
+        String selectQuery =   "SELECT COUNT (id)\n" +
+                                    "FROM public.lecture\n";
+        
+        
+        
+        
+        int lectureSizeBeforeAdding = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+        getResultsFromQuery(insertQuery, 1);
+         int lectureSizeAfterAdding = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+        
+        if(lectureSizeAfterAdding - lectureSizeBeforeAdding == 1){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+
+
+    public ArrayList<IncomingLecture> displayIncomingLec(){
+        String query = "SELECT 	lecture.id, date, lecture.subject, lecturer.first_name, lecturer.last_name, room_id\n" +
+                       "   FROM 	public.lecture, public.lecturer\n" +
+                       "   WHERE	lecturer_id = lecturer.id and\n" +
+                       "   date BETWEEN CURRENT_DATE and CURRENT_DATE+7";
+        
+        ArrayList<String> lectureIds = getResultsFromQuery(query, 1);
+        ArrayList<String> lectureDates = getResultsFromQuery(query, 2);
+        ArrayList<String> lectureSubjects = getResultsFromQuery(query, 3);
+        ArrayList<String> lecturerFirstNames = getResultsFromQuery(query, 4);
+        ArrayList<String> lecturerLastNames = getResultsFromQuery(query, 5);
+        ArrayList<String> roomIds = getResultsFromQuery(query, 6);
+
+         //System.out.println(arrayListToString(lectureSubject));
+       
+        return fillIncomingLecture(lectureIds, lectureDates, lectureSubjects, lecturerFirstNames, lecturerLastNames, roomIds);
+    }  
+    
+    public int createEnrolledVisitorsInstanse(int lectureId, int visitorId){
+        //return 0 when inserting instance into DB has failed
+        // return 1 when the instance successfully inserted into the DB
+        // return 2 when the visitor has already booked a place in that lecture
+        
+        String insertQuery =  "INSERT INTO public.enrolled_lecture_visitors(\n" +
+                        "lecture_id, visitor_id)\n" +
+                        "VALUES	(" + lectureId +", " + visitorId +")";
+        String selectQuery =   "SELECT lecture_id\n" +
+                               "FROM public.enrolled_lecture_visitors\n" + 
+                               "WHERE lecture_id = " + lectureId + " and visitor_id = " + visitorId;
+        try{
+            if(getResultsFromQuery(selectQuery, 1).size() != 0) {
+                return 2;
+            }
+            getResultsFromQuery(insertQuery, 1);
+            if(getResultsFromQuery(selectQuery, 1).size() == 1){
+                return 1;
+            }
+            
+        }catch(Exception e){
+            e.printStackTrace();
+        }        
+        return 0;
+    }
+    
+    
+    public boolean increseEnrolledVisitors(int lectureId){
+        String selectQuery = "SELECT    enrolled_visitors FROM public.lecture WHERE id = " + lectureId;
+        String updateQuery = "UPDATE 	public.lecture\n" +
+                       "SET 	enrolled_visitors = enrolled_visitors + 1\n" +
+                       "WHERE id = " + lectureId;
+        
+        try {
+            int enrolledVistorsBeforeUpdate = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+            getResultsFromQuery(updateQuery, 1);
+            int enrolledVistorsAfterUpdate = Integer.parseInt(getResultsFromQuery(selectQuery, 1).get(0));
+            if(enrolledVistorsAfterUpdate > enrolledVistorsBeforeUpdate) {
+                return true;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+        
+        //createInstanse();
+    }
+    
+    public boolean checkRoomCapacity(int lectureId){
+        String query =  "SELECT	room_id\n" +
+                        "FROM	public.lecture, public.room\n" +
+                        "WHERE	lecture.room_id = room.id 	and\n" +
+                        "lecture.id = " + lectureId +"	and \n" +
+                        "room.maximum_number_of_visitors >= lecture.enrolled_visitors + 1";
+   
+        try{
+            ArrayList<String> roomIds = getResultsFromQuery(query, 1);
+
+            int roomId = Integer.parseInt(roomIds.get(0));
+            return true;
+            
+        }catch(Exception e){
+            System.out.println("You can NOT book this lecture!");
+        }
+        return false;
+    }
+
+
+
+
+    private ArrayList<StockBook> fillStockBooksInstance(ArrayList<String> isbns, ArrayList<String> titles, ArrayList<String> authors, ArrayList<String> languages, ArrayList<String> publishDates, ArrayList<String> availableCopies) {
+        ArrayList<StockBook> stockBooks = new ArrayList<>();
+        int numberOfBooks = isbns.size();
+        for(int i = 0; i < numberOfBooks; i++) {
+           StockBook sb = new StockBook();
+           sb.setIsbn(new BigInteger(isbns.get(i)));
+           sb.setTitle(titles.get(i));
+           sb.setAuthor(authors.get(i));
+           sb.setLanguage(languages.get(i));
+           sb.setPublishDate(publishDates.get(i));
+           sb.setAvailableCopies(Integer.parseInt(availableCopies.get(i)));
+           stockBooks.add(sb);
+        }
+        return stockBooks;
+        
+    }
+
+    private ArrayList<VisitorCurrentRental> fillVisitorRentals(ArrayList<String> isbns, ArrayList<String> titles, ArrayList<String> authors, ArrayList<String> languages, ArrayList<String> rentalDates, ArrayList<String> returnDates) {
+        
+        ArrayList<VisitorCurrentRental> visitorRentals = new ArrayList<>();
+        int numberOfRentedBooks = isbns.size();
+        for(int i = 0; i < numberOfRentedBooks; i++) {
+           VisitorCurrentRental vCR = new VisitorCurrentRental();
+           vCR.setIsbn(new BigInteger(isbns.get(i)));
+           vCR.setTitle(titles.get(i));
+           vCR.setAuthor(authors.get(i));
+           vCR.setLanguage(languages.get(i));
+           vCR.setRental_date(rentalDates.get(i));
+           vCR.setReturn_date(returnDates.get(i));
+           visitorRentals.add(vCR);
+        }
+        return visitorRentals;
+        
+    }
+
+    private ArrayList<IncomingLecture> fillIncomingLecture(ArrayList<String> lectureIds, ArrayList<String> lectureDates, ArrayList<String> lectureSubjects, ArrayList<String> lecturerFirstNames, ArrayList<String> lecturerLastNames, ArrayList<String> roomIds) {
+        ArrayList<IncomingLecture> incomingLectures = new  ArrayList<>();
+        int incomingLecturesSize = lectureIds.size();
+            
+        for(int i = 0; i < incomingLecturesSize; i++) {
+            IncomingLecture incomingLecture = new IncomingLecture();
+            incomingLecture.setId(Integer.parseInt(lectureIds.get(i)));
+            incomingLecture.setDate(lectureDates.get(i));
+            incomingLecture.setSubject(lectureSubjects.get(i));
+            incomingLecture.setLecturerFirstName(lecturerFirstNames.get(i));
+            incomingLecture.setLecturerLastName(lecturerLastNames.get(i));
+            incomingLecture.setRoomId(Integer.parseInt(roomIds.get(i)));
+                
+            incomingLectures.add(incomingLecture);
+        }
+        return incomingLectures;
+    }
+
     
     /**
      *
@@ -374,46 +599,4 @@ public class DatabaseHandler {
         return new ArrayList<>();
     }
 
-    private ArrayList<StockBook> fillStockBooksInstance(ArrayList<String> isbns, ArrayList<String> titles, ArrayList<String> authors, ArrayList<String> languages, ArrayList<String> publishDates, ArrayList<String> availableCopies) {
-        ArrayList<StockBook> stockBooks = new ArrayList<>();
-        int numberOfBooks = isbns.size();
-        for(int i = 0; i < numberOfBooks; i++) {
-           StockBook sb = new StockBook();
-           sb.setIsbn(new BigInteger(isbns.get(i)));
-           sb.setTitle(titles.get(i));
-           sb.setAuthor(authors.get(i));
-           sb.setLanguage(languages.get(i));
-           sb.setPublishDate(publishDates.get(i));
-           sb.setAvailableCopies(Integer.parseInt(availableCopies.get(i)));
-           stockBooks.add(sb);
-        }
-        return stockBooks;
-        
-    }
-
-    private ArrayList<VisitorCurrentRental> fillVisitorRentals(ArrayList<String> isbns, ArrayList<String> titles, ArrayList<String> authors, ArrayList<String> languages, ArrayList<String> rentalDates, ArrayList<String> returnDates) {
-        
-        ArrayList<VisitorCurrentRental> visitorRentals = new ArrayList<>();
-        int numberOfRentedBooks = isbns.size();
-        for(int i = 0; i < numberOfRentedBooks; i++) {
-           VisitorCurrentRental vCR = new VisitorCurrentRental();
-           vCR.setIsbn(new BigInteger(isbns.get(i)));
-           vCR.setTitle(titles.get(i));
-           vCR.setAuthor(authors.get(i));
-           vCR.setLanguage(languages.get(i));
-           vCR.setRental_date(rentalDates.get(i));
-           vCR.setReturn_date(returnDates.get(i));
-           visitorRentals.add(vCR);
-        }
-        return visitorRentals;
-        
-    }
-
-    
-           
-                
-    
-   
-
-  
 }

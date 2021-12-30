@@ -6,6 +6,9 @@ package controller;
  */
 
 import beans.StockBook;
+import beans.IncomingLecture;
+import beans.LectureInfo;
+import beans.OngoingLectureInfo;
 import beans.VisitorCurrentRental;
 import integration.DatabaseHandler;
 import java.io.IOException;
@@ -113,8 +116,8 @@ public class Controller extends HttpServlet {
         }else if(parametersMap.containsKey("returnBook")){
             showCurrentRentedBooks(request, response, parametersMap);
             
-        }else if(parametersMap.containsKey("bookLecture")){
-            forwardingDispatcher(request, response, "/lecturesPage.jsp");
+        }else if(parametersMap.containsKey("displayLectures")){
+            displayLectures(request, response, parametersMap);
         }
     }
     
@@ -193,18 +196,87 @@ public class Controller extends HttpServlet {
         
     }
 
+   public void bookLecture(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException {
+        int lectureId = Integer.parseInt(request.getParameter("bookLecture"));
+        int userID = Integer.parseInt((String) getAttributeFromSession(request, "visitorID"));
+        if(!(this.databaseHandler.checkRoomCapacity(lectureId))){
+            forwardingDispatcher(request, response, "/maximumEnrolledVisitorsReached.jsp");
+            return;
+          //System.out.println("You can book this lecture!");
+        }
+        if(!(this.databaseHandler.increseEnrolledVisitors(lectureId))) {
+            forwardingDispatcher(request, response, "/unsuccessfulVisitorLectureRegistration.jsp");
+            return;
+        }
+        int enrolledVisitorInstanceCase = this.databaseHandler.createEnrolledVisitorsInstanse(lectureId, userID);
+        if(enrolledVisitorInstanceCase == 0) {
+            forwardingDispatcher(request, response, "/unsuccessfulVisitorLectureRegistration.jsp");
+            return;
+        }else if(enrolledVisitorInstanceCase == 2) {
+            forwardingDispatcher(request, response, "/alreadEnrolledVisitorError.jsp");
+            return;
+        }else {
+            forwardingDispatcher(request, response, "/successfullyEnrolled.jsp");
+            return;
+        }
+        
+    }
+
+
+	
     
     
     
     
     public void administratorPageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException{
         if(parametersMap.containsKey("listLectures")){
+            ArrayList<OngoingLectureInfo> lectures = this.databaseHandler.importOngoingLectures();
+            addAttributeToSession(request, "lectures", lectures);
             forwardingDispatcher(request, response, "/lectureListPage.jsp");
         }
         else if(parametersMap.containsKey("newSlot")){
             forwardingDispatcher(request, response, "/newSlot.jsp");
         }
     }
+
+
+    public void displayLectures(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException {
+        ArrayList<IncomingLecture> weekIncomingLecture = this.databaseHandler.displayIncomingLec();
+        addAttributeToSession(request, "weekIncomingLecture", weekIncomingLecture);
+        forwardingDispatcher(request, response, "/lecturePage.jsp");
+    }
+    
+
+    public void addNewLecturePageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap){
+        try{    
+            ArrayList<String> newSlotInfo = new ArrayList<>();
+            String lectureName = request.getParameter("lectureName");
+            String lectureDate = request.getParameter("lectureDate");
+            int roomId = Integer.parseInt(request.getParameter("roomId"));
+            String lecturerPerNum = request.getParameter("lecturerPerNum");
+            
+            
+            //ArrayList<LectureInfo> lectureInfoList = new ArrayList<LectureInfo>();
+            LectureInfo lectureInfo = new LectureInfo();
+            lectureInfo.setLectureSubject(lectureName);
+            lectureInfo.setLectureDate(lectureDate);
+            lectureInfo.setRoomId(roomId);
+            lectureInfo.setLecturerPersonNum(lecturerPerNum);
+            
+            boolean addedOrNotAdded = this.databaseHandler.newLectureInsert(lectureInfo);
+            
+            if (addedOrNotAdded == true){
+                forwardingDispatcher(request, response, "/lectureIsAddedPage.jsp");
+            }else{
+                forwardingDispatcher(request, response, "/lectureIsNotAddedPage.jsp");
+            }
+            }catch(Exception e) {
+            e.printStackTrace();
+        }          
+    }
+
+
+
     
     
     
@@ -248,16 +320,24 @@ public class Controller extends HttpServlet {
             }else if(parametersMap.containsKey("adminEmail")) {
                 adminLoginPageHandler(request, response);
             }
-            else if(parametersMap.containsKey("rentBook") || parametersMap.containsKey("returnBook") || parametersMap.containsKey("bookLecture")) {
+            else if(parametersMap.containsKey("rentBook") || parametersMap.containsKey("returnBook") || parametersMap.containsKey("displayLectures")) {
                  visitorPageHandler(request, response, parametersMap);
+            }
+	    else if (parametersMap.containsKey("rentBookAction")) {
+                rentBookActionPageHandler(request, response, parametersMap);
+            }
+	    else if(parametersMap.containsKey("returnBookAction")) {
+                returnBookActionPageHandler(request, response, parametersMap);
+            }
+	    else if(parametersMap.containsKey("bookLecture")) {
+                bookLecture(request, response, parametersMap);
             }
             else if(parametersMap.containsKey("listLectures") || parametersMap.containsKey("newSlot")) {
                 
                 administratorPageHandler(request, response, parametersMap);
-            }else if (parametersMap.containsKey("rentBookAction")) {
-                rentBookActionPageHandler(request, response, parametersMap);
-            }else if(parametersMap.containsKey("returnBookAction")) {
-                returnBookActionPageHandler(request, response, parametersMap);
+            }
+	    else if(parametersMap.containsKey("addNewLecture")) {
+                addNewLecturePageHandler(request, response, parametersMap);
             }
         
     }catch(Exception e) {

@@ -7,7 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <%
-    if(session.getAttribute("adminID") == null) {
+    if(session.getAttribute("adminID") == "") {
         return;
     }
 %>

@@ -12,18 +12,17 @@
         <title>JSP Page</title>
     </head>
         <body>
-        <h1>Welcome!</h1>
-        <p>Log in for taking the quiz:</p>
+        <h1>Add a new lecture:</h1>
         <form method="post">
         <label>Enter the lecture name:</label>
-        <input type=\"text\" id="\lecture" name="lecture" placeholder="lecture name"></input><br><br>
+        <input type=\"text\" id="\lecture" name="lectureName" placeholder="lecture name"></input><br><br>
         <label>Enter the date of the lecture:</label>
-        <input type=\"text\" id="\lectureDate" name="lectureDate" placeholder="22-10-2021"></input><br><br>
-        <label>Enter lecturer name:</label>
-        <input type="password" id="lecturerName" name="lecturerName" placeholder="John Andersson"></input><br><br>
+        <input type=\"text\" id="\lectureDate" name="lectureDate" placeholder="example 22-10-2021"></input><br><br>
+        <label>Enter room id:</label>
+        <input type="text\" id="roomId" name="roomId" placeholder="example 9"></input><br><br>
         <label>Enter lecturer person number:</label>
-        <input type="password" id="lecturerPerNum" name="lecturerPerNum" placeholder="19720705-XXXX"></input><br><br>
-        <button type=\"submit\" >Add lecture</button>
+        <input type="text\" id="lecturerPerNum" name="lecturerPerNum" placeholder="19720705-XXXX"></input><br><br>
+        <button type=\"submit\ name ="addNewLecture" >Add lecture</button>
     </form>
     </body>
 </html>

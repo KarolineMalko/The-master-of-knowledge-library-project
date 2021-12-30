@@ -28,7 +28,7 @@
         </form>
         <h2>Lecture:</h2>
         <form method="post">
-            <button type=\"submit\" name="bookLecture">Book a lecture</button>
+            <button type=\"submit\" name="displayLectures">Book a lecture</button>
         </form>
     </body>
 </html>

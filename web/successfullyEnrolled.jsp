@@ -1,6 +1,6 @@
 <%-- 
-    Document   : lecturesPage
-    Created on : Dec 22, 2021, 7:45:11 PM
+    Document   : successfullyEnrolled
+    Created on : Dec 29, 2021, 6:08:16 PM
     Author     : Karoline Malko
 --%>
 
@@ -12,6 +12,6 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <h1>Available lectures:</h1>
+        <h1>The lecture has been booked successfully!</h1>
     </body>
 </html>
