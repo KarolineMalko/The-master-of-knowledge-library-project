@@ -33,10 +33,11 @@
         <title>Administrator Page</title>
     </head>
     <body>
-       <h1 class="h1Custom">Welcome!</h1>
-        <h2 class="h1Custom">choose what to do:</h2>
+       <h1>Welcome!</h1>
+        <h2>choose what to do:</h2>
         <form method="post">
-          <div class="col-sm-2">  <button type=\"submit\" class="form-control" name="listLectures">Se listed lectures</button> </div>
+          <div class="col-sm-2">  <button type=\"submit\" class="form-control" name="listLectures">Show the ongoing lectures</button> </div>
+          <div class="col-sm-2">  <button type=\"submit\" class="form-control" name="showWeekLectures">Show week's incoming lectures</button> </div>
            <div class="col-sm-2"> <button type=\"submit\" class="form-control" name="newSlot">Create a new slot</button></div>
         </form>
     </body>

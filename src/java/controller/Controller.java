@@ -246,6 +246,13 @@ public class Controller extends HttpServlet {
         forwardingDispatcher(request, response, "/lecturePage.jsp");
     }
     
+    private void showAdminIncomingLectures(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap) throws ServletException, IOException {
+        ArrayList<IncomingLecture> weekIncomingLecture = this.databaseHandler.displayIncomingLec();
+        addAttributeToSession(request, "weekIncomingLecture", weekIncomingLecture);
+        forwardingDispatcher(request, response, "/AdminIcomigLecturePage.jsp");
+    }
+
+    
 
     public void addNewLecturePageHandler(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> parametersMap){
         try{    
@@ -336,6 +343,9 @@ public class Controller extends HttpServlet {
                 
                 administratorPageHandler(request, response, parametersMap);
             }
+            else if(parametersMap.containsKey("showWeekLectures")) {
+                showAdminIncomingLectures(request, response, parametersMap);
+            }
 	    else if(parametersMap.containsKey("addNewLecture")) {
                 addNewLecturePageHandler(request, response, parametersMap);
             }
@@ -356,6 +366,7 @@ public class Controller extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    
     
     
 
