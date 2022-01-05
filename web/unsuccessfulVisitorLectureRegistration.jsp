@@ -23,6 +23,21 @@
                         "</html>\n";
         out.print(str);
         return;
+    }else if (session.getAttribute("visitorID") == "") {
+        String str = "<!DOCTYPE html>\n " + 
+                        "<html>\n" + 
+                            "<head> \n" +
+                                "<meta name=\"viewport\" http-equiv=\"Content-Type\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n" + 
+                                "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\">\n" +
+                                "<title>Administrator Page</title> \n" + 
+                            "</head>\n" + 
+                            "<body> \n" +
+                               "<h1>You have entered incorrect email or password. Double check the entered info, and try again! </h1>\n" +
+                                    "<button onclick=\"location.href=\'http://localhost:8080/TheMasterOfKnowledgeLibrary/Controller\'\" type=\"button\" class=\"btn btn-default\">Main Page</button>\n" + 
+                            "</body>\n" +
+                        "</html>\n";
+        out.print(str);
+        return;
     }
 %>
 
