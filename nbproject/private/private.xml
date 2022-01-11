@@ -3,25 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/lectureIsNotAddedPage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/adminLoginPage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/failedRental.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/lecturePage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/visitorPage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/unsuccessfulVisitorLectureRegistration.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/lectureListPage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/alreadEnrolledVisitorError.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/availableStockBooksPage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/lectureIsAddedPage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/successfulRental.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/successfulReturn.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/failedRentalReturn.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/AdminIcomigLecturePage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/welcomePage.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/successfullyEnrolled.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/maximumEnrolledVisitorsReached.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/showVisitorRentals.jsp</file>
-            <file>file:/D:/KTH/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/visitorLoginPage.jsp</file>
+            <file>file:/E:/KTH%20material/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/src/java/controller/Controller.java</file>
+            <file>file:/E:/KTH%20material/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/src/java/integration/DatabaseHandler.java</file>
+            <file>file:/E:/KTH%20material/Year%203/ID1212%20%20Nätverksprogrammering/Project/WebApplication/masterOfKnowledgeLibraryDB/web/availableStockBooksPage.jsp</file>
         </group>
     </open-files>
 </project-private>
